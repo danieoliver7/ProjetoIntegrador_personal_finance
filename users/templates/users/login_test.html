@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login Test</title>
+</head>
+<body>
+    <h1>Teste de Login</h1>
+    
+    <form method="POST" action="{% url 'login' %}">
+        {% csrf_token %}
+        <div>
+            <label for="username">Email:</label>
+            <input type="email" name="username" id="username" required>
+        </div>
+        <div>
+            <label for="password">Senha:</label>
+            <input type="password" name="password" id="password" required>
+        </div>
+        <button type="submit">Entrar</button>
+    </form>
+    
+    {% if form.errors %}
+    <div style="color: red; margin-top: 20px;">
+        <p>Erros:</p>
+        <ul>
+            {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                    <li>{{ field }}: {{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</body>
+</html> 

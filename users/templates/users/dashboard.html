@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-900 py-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-purple-900 bg-opacity-20 rounded-lg shadow-xl p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-3xl font-bold text-white">Bem-vindo, {{ user.name }}</h1>
+                <a href="{% url 'logout' %}" class="bg-purple-800 hover:bg-purple-700 text-white px-4 py-2 rounded-lg">Sair</a>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-gray-800 rounded-lg p-6 shadow-md">
+                    <h2 class="text-xl font-semibold text-purple-400 mb-4">Saldo Atual</h2>
+                    <p class="text-3xl font-bold text-white">R$ 0,00</p>
+                </div>
+                
+                <div class="bg-gray-800 rounded-lg p-6 shadow-md">
+                    <h2 class="text-xl font-semibold text-green-400 mb-4">Receitas do Mês</h2>
+                    <p class="text-3xl font-bold text-white">R$ 0,00</p>
+                </div>
+                
+                <div class="bg-gray-800 rounded-lg p-6 shadow-md">
+                    <h2 class="text-xl font-semibold text-red-400 mb-4">Despesas do Mês</h2>
+                    <p class="text-3xl font-bold text-white">R$ 0,00</p>
+                </div>
+            </div>
+            
+            <div class="mt-8">
+                <h2 class="text-2xl font-bold text-white mb-4">Últimas Transações</h2>
+                <div class="bg-gray-800 rounded-lg shadow-md overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-700">
+                        <thead class="bg-gray-700">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Data</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Descrição</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Categoria</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-gray-800 divide-y divide-gray-700">
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300" colspan="4">
+                                    Nenhuma transação encontrada.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
