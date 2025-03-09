@@ -60,6 +60,3 @@ O projeto está em desenvolvimento inicial. Etapas concluídas:
    python manage.py runserver
    ```
 
-## 📝 Licença
-
-Este projeto está sob a licença MIT.
