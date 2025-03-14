@@ -3,7 +3,7 @@ from django.contrib.auth import login, authenticate
 from django.contrib import messages
 from django.views import View
 from .forms import CustomUserCreationForm, CustomAuthenticationForm
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth import get_user_model
 
 def profile_view(request):
     return render(request, 'users/profile.html')
@@ -32,22 +32,46 @@ class LoginView(View):
         return render(request, self.template_name, {'form': form})
     
     def post(self, request):
-        # Adicione logs para depuração
-        print("POST data:", request.POST)
+        # Imprimindo dados recebidos do formulário
+        print("="*50)
+        print("DADOS RECEBIDOS DO FORMULÁRIO:")
+        print(f"Método da requisição: {request.method}")
+        print(f"Dados POST: {request.POST}")
         
+        if 'username' in request.POST:
+            print(f"Email digitado: {request.POST['username']}")
+        else:
+            print("Campo 'username' não foi recebido!")
+            
+        if 'password' in request.POST:
+            print(f"Senha foi recebida (não mostrada por segurança)")
+        else:
+            print("Campo 'password' não foi recebido!")
+        print("="*50)
+        
+        # Processamento normal do formulário
         form = CustomAuthenticationForm(request, data=request.POST)
-        
-        # Verifique se o formulário é válido e por que não é
-        if not form.is_valid():
-            print("Form errors:", form.errors)
-        
         if form.is_valid():
+            print("Formulário é válido!")
             email = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
-            user = authenticate(username=email, password=password)
             
-            # Debug authentication
-            print("Authenticate result:", user)
+            # Log para verificar usuário no banco
+            User = get_user_model()
+            try:
+                user_obj = User.objects.get(email=email)
+                print(f"Usuário existe no banco: {user_obj.email}")
+                print(f"Username no banco: {user_obj.username}")
+                
+                # Verifique se o usuário pode fazer login
+                if not user_obj.is_active:
+                    print("ALERTA: Usuário está inativo!")
+            except User.DoesNotExist:
+                print(f"ERRO: Usuário com email {email} não existe no banco!")
+            
+            # Tente autenticar
+            user = authenticate(username=email, password=password)
+            print(f"Autenticação retornou: {user}")
             
             if user is not None:
                 login(request, user)
@@ -55,13 +79,22 @@ class LoginView(View):
                 return redirect('dashboard')
             else:
                 messages.error(request, "Email ou senha inválidos.")
+        else:
+            print(f"Formulário inválido. Erros: {form.errors}")
+            
         return render(request, self.template_name, {'form': form})
 
-class DashboardView(LoginRequiredMixin, View):
+class DashboardView(View):
     template_name = 'users/dashboard.html'
-    login_url = 'login'  # Redireciona para login se o usuário não estiver autenticado
     
     def get(self, request):
-        # Aqui você pode adicionar contexto adicional se necessário
-        return render(request, self.template_name)
+        # Dados de exemplo para o dashboard
+        context = {
+            'value': {'amount': 30000, 'percent': 4.6},
+            'users': {'amount': 50021, 'percent': 2.5},
+            'orders': {'amount': 45021, 'percent': 3.1},
+            'tickets': {'amount': 20516, 'percent': 3.1},
+            'active_users': 81
+        }
+        return render(request, self.template_name, context)
 

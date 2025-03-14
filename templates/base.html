@@ -1,27 +1,66 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Controle Financeiro{% endblock %}</title>
+    <title>Finance Control</title>
     <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.js" defer></script>
-    {% block extra_css %}{% endblock %}
 </head>
-<body class="bg-gray-900 text-white">
-    {% if messages %}
-    <div class="fixed top-0 right-0 p-4 z-50">
-        {% for message in messages %}
-        <div class="bg-gray-800 text-white px-4 py-3 rounded shadow-md mb-2 flex items-center {{ message.tags }}">
-            <span>{{ message }}</span>
-            <button class="ml-4 text-gray-400 hover:text-white" onclick="this.parentElement.remove()">&times;</button>
+<body>
+    <div class="flex">
+        <!-- Barra lateral -->
+        <div class="w-56 bg-purple-900 shadow-lg h-screen fixed left-0 top-0">
+            <div class="p-4 border-b border-purple-800">
+                <h1 class="text-xl font-semibold text-white">Finance Control</h1>
+            </div>
+            <nav class="mt-4">
+                <a href="{% url 'dashboard' %}" class="block px-4 py-2 text-purple-100 hover:bg-purple-700 hover:text-white rounded-lg mx-2 mb-1">
+                    <span class="flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                        </svg>
+                        Dashboard
+                    </span>
+                </a>
+                <a href="#" class="block px-4 py-2 text-purple-100 hover:bg-purple-700 hover:text-white rounded-lg mx-2 mb-1">
+                    <span class="flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Transações
+                    </span>
+                </a>
+                <a href="#" class="block px-4 py-2 text-purple-100 hover:bg-purple-700 hover:text-white rounded-lg mx-2 mb-1">
+                    <span class="flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                        Orçamentos
+                    </span>
+                </a>
+                <a href="#" class="block px-4 py-2 text-purple-100 hover:bg-purple-700 hover:text-white rounded-lg mx-2 mb-1">
+                    <span class="flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                        Perfil
+                    </span>
+                </a>
+                <a href="{% url 'logout' %}" class="block px-4 py-2 text-purple-100 hover:bg-purple-700 hover:text-white rounded-lg mx-2 mb-1">
+                    <span class="flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                        </svg>
+                        Sair
+                    </span>
+                </a>
+            </nav>
         </div>
-        {% endfor %}
+        
+        <!-- Conteúdo principal -->
+        <div class="ml-56 flex-1">
+            {% block content %}{% endblock %}
+        </div>
     </div>
-    {% endif %}
-
-    {% block content %}{% endblock %}
-
-    {% block extra_js %}{% endblock %}
 </body>
 </html> 
