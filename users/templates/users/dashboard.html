@@ -1,322 +1,194 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title %}Dashboard{% endblock %}
+
 {% block content %}
-<div class="bg-gray-100 min-h-screen">
-    <!-- Cabeçalho -->
-    <div class="flex justify-between items-center p-4 bg-white shadow mb-4">
-        <h1 class="text-2xl font-medium text-gray-800">Dashboard</h1>
-        <h2 class="text-xl font-medium text-purple-600">Controle Financeiro</h2>
+<div class="container mx-auto px-4 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">Olá, {{ user.name }}</h1>
+        <p class="text-gray-600">Bem-vindo ao seu painel financeiro</p>
     </div>
 
-    <!-- Cards de estatísticas -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 px-4 mb-6">
-        <!-- Card 1: Carteira (antes VALUE) -->
-        <div class="bg-white rounded-lg shadow p-4 flex justify-between items-center">
-            <div>
-                <p class="text-sm uppercase text-gray-600 font-medium">Carteira</p>
-                <h2 class="text-2xl font-bold">R${{ value.amount|floatformat:0 }}</h2>
-                <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">+{{ value.percent }}%</span>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Cartão da Carteira -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-semibold text-gray-700">Carteira</h2>
+                <span class="text-gray-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                    </svg>
+                </span>
             </div>
-            <div class="bg-purple-100 p-3 rounded-full">
-                <svg class="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
+            <div class="mb-4">
+                <span class="text-3xl font-bold text-gray-800">R$ {{ wallet_value|floatformat:2 }}</span>
+                <div class="flex items-center mt-1">
+                    <span class="text-sm {% if wallet_growth >= 0 %}text-green-500{% else %}text-red-500{% endif %}">
+                        {% if wallet_growth >= 0 %}+{% endif %}{{ wallet_growth }}%
+                    </span>
+                    <span class="text-xs text-gray-500 ml-2">desde o mês passado</span>
+                </div>
             </div>
-        </div>
-
-        <!-- Card 2: Despesas (antes USERS) -->
-        <div class="bg-white rounded-lg shadow p-4 flex justify-between items-center">
-            <div>
-                <p class="text-sm uppercase text-gray-600 font-medium">Despesas</p>
-                <h2 class="text-2xl font-bold">{{ users.amount|floatformat:0 }}</h2>
-                <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">+{{ users.percent }}%</span>
-            </div>
-            <div class="bg-purple-100 p-3 rounded-full">
-                <svg class="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                </svg>
+            <div class="mt-4">
+                <a href="{% url 'balance_create' %}" class="text-blue-500 hover:text-blue-700 text-sm font-medium">
+                    Gerenciar saldo
+                </a>
             </div>
         </div>
 
-        <!-- Card 3: Recebimento (antes ORDERS) -->
-        <div class="bg-white rounded-lg shadow p-4 flex justify-between items-center">
-            <div>
-                <p class="text-sm uppercase text-gray-600 font-medium">Recebimento</p>
-                <h2 class="text-2xl font-bold">{{ orders.amount|floatformat:0 }}</h2>
-                <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">+{{ orders.percent }}%</span>
+        <!-- Cartão de Despesas -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-semibold text-gray-700">Despesas</h2>
+                <span class="text-gray-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
+                    </svg>
+                </span>
             </div>
-            <div class="bg-purple-100 p-3 rounded-full">
-                <svg class="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                </svg>
+            <div class="mb-4">
+                <span class="text-3xl font-bold text-gray-800">R$ {{ expenses_total|floatformat:2 }}</span>
+                <div class="flex items-center mt-1">
+                    <span class="text-sm {% if expenses_growth <= 0 %}text-green-500{% else %}text-red-500{% endif %}">
+                        {% if expenses_growth >= 0 %}+{% else %}-{% endif %}{{ expenses_growth_abs }}%
+                    </span>
+                    <span class="text-xs text-gray-500 ml-2">desde o mês passado</span>
+                </div>
+            </div>
+            <div class="mt-4">
+                <a href="{% url 'transaction_list' %}" class="text-blue-500 hover:text-blue-700 text-sm font-medium">
+                    Ver transações
+                </a>
             </div>
         </div>
 
-        <!-- Card 4: Investido (antes TICKETS) -->
-        <div class="bg-white rounded-lg shadow p-4 flex justify-between items-center">
-            <div>
-                <p class="text-sm uppercase text-gray-600 font-medium">Investido</p>
-                <h2 class="text-2xl font-bold">{{ tickets.amount|floatformat:0 }}</h2>
-                <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">+{{ tickets.percent }}%</span>
+        <!-- Cartão de Recebimentos -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-semibold text-gray-700">Recebimento</h2>
+                <span class="text-gray-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                    </svg>
+                </span>
             </div>
-            <div class="bg-purple-100 p-3 rounded-full">
-                <svg class="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path>
-                </svg>
+            <div class="mb-4">
+                <span class="text-3xl font-bold text-gray-800">R$ {{ income_total|floatformat:2 }}</span>
+                <div class="flex items-center mt-1">
+                    <span class="text-sm {% if income_growth >= 0 %}text-green-500{% else %}text-red-500{% endif %}">
+                        {% if income_growth >= 0 %}+{% else %}-{% endif %}{{ income_growth_abs }}%
+                    </span>
+                    <span class="text-xs text-gray-500 ml-2">desde o mês passado</span>
+                </div>
+            </div>
+            <div class="mt-4">
+                <a href="{% url 'transaction_list' %}" class="text-blue-500 hover:text-blue-700 text-sm font-medium">
+                    Ver transações
+                </a>
             </div>
         </div>
     </div>
 
-    <!-- Reorganização em 2x2 quadrantes -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 px-4 mb-6">
-        <!-- Quadrante 1: Gráfico de Barras (Superior Esquerdo) -->
-        <div class="bg-white rounded-lg shadow px-5 py-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <!-- Cartão de Orçamentos -->
+        <div class="bg-white rounded-lg shadow-md p-6">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-medium text-gray-700">Receitas vs Despesas</h3>
-                <button class="text-xs text-gray-500 hover:text-purple-600 transition-colors font-medium">Last year</button>
+                <h2 class="text-lg font-semibold text-gray-700">Orçamentos</h2>
+                <a href="{% url 'budget_list' %}" class="text-blue-500 hover:text-blue-700 text-sm font-medium">
+                    Ver todos
+                </a>
             </div>
-            <div class="h-60">
-                <canvas id="barChart"></canvas>
+            <div class="space-y-4">
+                <p class="text-gray-600 text-sm">Acompanhe seus orçamentos mensais por categoria</p>
+                <div class="flex justify-center items-center h-32">
+                    <div class="text-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        <p class="mt-2 text-gray-500">Crie orçamentos para controlar seus gastos</p>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Quadrante 2: Gráfico de Rosca (Superior Direito) -->
-        <div class="bg-white rounded-lg shadow px-5 py-4">
+        <!-- Cartão de Metas -->
+        <div class="bg-white rounded-lg shadow-md p-6">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-medium text-gray-700">Categorias de Despesas</h3>
-                <button class="text-xs text-gray-500 hover:text-purple-600 transition-colors font-medium">Last year</button>
+                <h2 class="text-lg font-semibold text-gray-700">Metas Financeiras</h2>
+                <a href="{% url 'goal_list' %}" class="text-blue-500 hover:text-blue-700 text-sm font-medium">
+                    Ver todas
+                </a>
             </div>
-            <div class="h-60 flex justify-center relative">
-                <canvas id="doughnutChart"></canvas>
-                <!-- Botões flutuantes no canto inferior direito -->
-                <div class="absolute bottom-0 right-0 flex space-x-2">
-                    <button class="px-3 py-1 bg-red-100 text-red-700 text-xs font-medium rounded hover:bg-red-200 transition-colors">
-                        Conta
-                    </button>
-                    <button class="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded hover:bg-green-200 transition-colors">
-                        Lucro
-                    </button>
-                    <button class="px-3 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded hover:bg-gray-200 transition-colors">
-                        Guardar
-                    </button>
+            <div class="space-y-4">
+                <p class="text-gray-600 text-sm">Acompanhe o progresso das suas metas de economia</p>
+                <div class="flex justify-center items-center h-32">
+                    <div class="text-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                        </svg>
+                        <p class="mt-2 text-gray-500">Defina metas para alcançar seus objetivos financeiros</p>
+                    </div>
                 </div>
             </div>
         </div>
-        
-        <!-- Quadrante 3: Lista de Contas (Inferior Esquerdo) -->
-        <div class="bg-white rounded-lg shadow px-5 py-4">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-medium text-gray-700">Contas</h3>
-                <button class="text-xs text-gray-500 hover:text-purple-600 transition-colors font-medium">Ver todas</button>
-            </div>
-            
-            <!-- Cabeçalho da Tabela -->
-            <div class="grid grid-cols-12 text-sm font-medium text-gray-500 border-b border-gray-200 pb-2 mb-2">
-                <div class="col-span-7">Descrição</div>
-                <div class="col-span-4 text-center">Data de vencimento</div>
-                <div class="col-span-1 text-right"></div>
-            </div>
-            
-            <!-- Itens da Lista -->
-            <div class="space-y-2">
-                <!-- Item 1 -->
-                <div class="grid grid-cols-12 items-center py-1.5">
-                    <div class="col-span-7 text-sm text-gray-700">Fatura do cartão de crédito - R$ 1.250,00</div>
-                    <div class="col-span-4 text-center text-xs text-purple-500 font-medium">15/06</div>
-                    <div class="col-span-1 flex justify-end">
-                        <input type="checkbox" class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded">
-                    </div>
-                </div>
-                
-                <!-- Item 2 -->
-                <div class="grid grid-cols-12 items-center py-1.5">
-                    <div class="col-span-7 text-sm text-gray-700">Aluguel do apartamento - R$ 1.800,00</div>
-                    <div class="col-span-4 text-center text-xs text-purple-500 font-medium">05/06</div>
-                    <div class="col-span-1 flex justify-end">
-                        <input type="checkbox" class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded">
-                    </div>
-                </div>
-                
-                <!-- Item 3 (pago) -->
-                <div class="grid grid-cols-12 items-center py-1.5">
-                    <div class="col-span-7 text-sm text-gray-500 line-through">Conta de água - R$ 120,00</div>
-                    <div class="col-span-4 text-center text-xs text-green-500 font-medium">Pago</div>
-                    <div class="col-span-1 flex justify-end">
-                        <input type="checkbox" class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded" checked>
-                    </div>
-                </div>
-                
-                <!-- Item 4 -->
-                <div class="grid grid-cols-12 items-center py-1.5">
-                    <div class="col-span-7 text-sm text-gray-700">Conta de luz - R$ 230,00</div>
-                    <div class="col-span-4 text-center text-xs text-purple-500 font-medium">20/06</div>
-                    <div class="col-span-1 flex justify-end">
-                        <input type="checkbox" class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded">
-                    </div>
-                </div>
-                
-                <!-- Item 5 (pago) -->
-                <div class="grid grid-cols-12 items-center py-1.5">
-                    <div class="col-span-7 text-sm text-gray-500 line-through">Internet e TV - R$ 199,90</div>
-                    <div class="col-span-4 text-center text-xs text-green-500 font-medium">Pago</div>
-                    <div class="col-span-1 flex justify-end">
-                        <input type="checkbox" class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded" checked>
-                    </div>
-                </div>
-                
-                <!-- Item 6 -->
-                <div class="grid grid-cols-12 items-center py-1.5">
-                    <div class="col-span-7 text-sm text-gray-700">Plano de saúde - R$ 450,00</div>
-                    <div class="col-span-4 text-center text-xs text-purple-500 font-medium">10/06</div>
-                    <div class="col-span-1 flex justify-end">
-                        <input type="checkbox" class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded">
-                    </div>
-                </div>
-                
-                <!-- Item 7 -->
-                <div class="grid grid-cols-12 items-center py-1.5">
-                    <div class="col-span-7 text-sm text-gray-700">Escola dos filhos - R$ 1.200,00</div>
-                    <div class="col-span-4 text-center text-xs text-purple-500 font-medium">07/06</div>
-                    <div class="col-span-1 flex justify-end">
-                        <input type="checkbox" class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded">
-                    </div>
-                </div>
-                
-                <!-- Item 8 (pago) -->
-                <div class="grid grid-cols-12 items-center py-1.5">
-                    <div class="col-span-7 text-sm text-gray-500 line-through">Condomínio - R$ 350,00</div>
-                    <div class="col-span-4 text-center text-xs text-green-500 font-medium">Pago</div>
-                    <div class="col-span-1 flex justify-end">
-                        <input type="checkbox" class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded" checked>
-                    </div>
-                </div>
-                
-                <!-- Item 9 -->
-                <div class="grid grid-cols-12 items-center py-1.5">
-                    <div class="col-span-7 text-sm text-gray-700">IPTU - Parcela 6/10 - R$ 180,00</div>
-                    <div class="col-span-4 text-center text-xs text-purple-500 font-medium">25/06</div>
-                    <div class="col-span-1 flex justify-end">
-                        <input type="checkbox" class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded">
-                    </div>
-                </div>
-                
-                <!-- Item 10 (atrasado) -->
-                <div class="grid grid-cols-12 items-center py-1.5">
-                    <div class="col-span-7 text-sm text-gray-700">Seguro do carro - R$ 275,00</div>
-                    <div class="col-span-4 text-center text-xs text-red-500 font-medium">Atrasado</div>
-                    <div class="col-span-1 flex justify-end">
-                        <input type="checkbox" class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded">
-                    </div>
-                </div>
-            </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-semibold text-gray-700">Transações Recentes</h2>
+            <a href="{% url 'transaction_list' %}" class="text-blue-500 hover:text-blue-700 text-sm font-medium">
+                Ver todas
+            </a>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Descrição
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Data
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Categoria
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Valor
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% if recent_transactions %}
+                        {% for transaction in recent_transactions %}
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">{{ transaction.description }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-500">{{ transaction.transaction_date|date:"d/m/Y" }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                        {{ transaction.category.name }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm {% if transaction.type == 'INCOME' %}text-green-600{% else %}text-red-600{% endif %}">
+                                    {% if transaction.type == 'INCOME' %}+{% else %}-{% endif %}R$ {{ transaction.amount|floatformat:2 }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                                Nenhuma transação recente encontrada
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
-
-<!-- Adicionar Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script>
-    // Configurações dos gráficos
-    document.addEventListener('DOMContentLoaded', function() {
-        // Definindo cores em tons de roxo
-        const primaryColor = '#9333ea';       // purple-600
-        const primaryColorLight = '#a855f7';  // purple-500
-        const secondaryColor = '#c084fc';     // purple-400
-        const tertiaryColor = '#d8b4fe';      // purple-300
-        
-        // Dados para os gráficos
-        const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-        
-        // Configuração da grade do gráfico de barras para parecer com a imagem
-        Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
-        Chart.defaults.font.size = 11;
-        
-        // Gráfico de Barras
-        const barCtx = document.getElementById('barChart').getContext('2d');
-        new Chart(barCtx, {
-            type: 'bar',
-            data: {
-                labels: months,
-                datasets: [{
-                    label: 'Receitas x Despesas',
-                    data: [102, 45, 65, 92, 45, 60, 70, 40, 75, 85, 100, 110],
-                    backgroundColor: primaryColorLight,
-                    borderWidth: 0,
-                    borderRadius: 4,
-                    maxBarThickness: 22
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                animation: {
-                    duration: 1200
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 150,
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.05)',
-                            lineWidth: 1
-                        },
-                        ticks: {
-                            padding: 10
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                }
-            }
-        });
-
-        // Gráfico de Rosca
-        const doughnutCtx = document.getElementById('doughnutChart').getContext('2d');
-        new Chart(doughnutCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Out', 'Nov', 'Dez'],
-                datasets: [{
-                    data: [30, 40, 30],
-                    backgroundColor: [
-                        primaryColor,
-                        secondaryColor,
-                        tertiaryColor
-                    ],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                animation: {
-                    duration: 1200
-                },
-                cutout: '75%',
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            boxWidth: 15,
-                            padding: 15,
-                            font: {
-                                size: 12
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    });
-</script>
 {% endblock %} 

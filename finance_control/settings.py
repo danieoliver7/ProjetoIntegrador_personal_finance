@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'tailwind',
     'finance_control',  # Substitua 'theme' pelo nome do seu aplicativo Tailwind
     'users',  # Certifique-se de que 'users' está incluído aqui
+    'transactions',  # Aplicativo para transações financeiras
+    'budgets',  # Aplicativo para orçamentos e metas
 ]
 
 MIDDLEWARE = [
