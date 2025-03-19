@@ -30,13 +30,104 @@
             </div>
         </div>
         
+        <!-- Botão para abrir o modal -->
+        <div class="text-right mb-4">
+            <button id="btnNewTransaction" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                Nova Transação
+            </button>
+        </div>
+
+        <!-- Modal (inicialmente escondido) -->
+        <div id="transactionModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex items-center justify-center z-50">
+            <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold">Nova Transação</h3>
+                    <button id="btnCloseModal" class="text-gray-600 hover:text-gray-800">
+                        <span class="text-2xl">&times;</span>
+                    </button>
+                </div>
+                
+                <form id="transactionForm">
+                    {% csrf_token %}
+                    
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="transactionType">
+                            Tipo de Transação*
+                        </label>
+                        <select id="transactionType" name="type" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                            <option value="">Selecione...</option>
+                            <option value="income">Entrada</option>
+                            <option value="expense">Saída</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="value">
+                            Valor*
+                        </label>
+                        <input type="number" id="value" name="amount" step="0.01" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="date">
+                            Data
+                        </label>
+                        <input type="date" id="date" name="date" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="title">
+                            Descrição*
+                        </label>
+                        <input type="text" id="title" name="description" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    
+                    
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="paymentMethod">
+                            Método de Pagamento*
+                        </label>
+                        <select id="paymentMethod" name="payment_method" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                            <option value="">Selecione...</option>
+                            {% for method in payment_methods %}
+                                <option value="{{ method.id }}">{{ method.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="status">
+                            Status
+                        </label>
+                        <select id="status" name="status" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                            <option value="paid">Pago</option>
+                            <option value="pending">Pendente</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="observation">
+                            Observação
+                        </label>
+                        <textarea id="observation" name="notes" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="flex items-center justify-end">
+                        <button type="button" id="btnCancelTransaction" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded mr-2">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                            Salvar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <!-- Lista de transações -->
         <div class="bg-white rounded-lg shadow overflow-hidden">
             <div class="flex justify-between items-center p-4 border-b border-gray-200">
                 <h3 class="text-lg font-medium text-gray-800">Histórico de Transações</h3>
-                <a href="#" class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors">
-                    Nova Transação
-                </a>
             </div>
             
             {% if transactions %}
@@ -49,9 +140,7 @@
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Data
                         </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Categoria
-                        </th>
+                       
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Valor
                         </th>
@@ -75,15 +164,7 @@
                             <div class="text-xs text-gray-400">Venc: {{ transaction.due_date }}</div>
                             {% endif %}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            {% if transaction.category %}
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
-                                {{ transaction.category.name }}
-                            </span>
-                            {% else %}
-                            <span class="text-gray-400 text-xs">Sem categoria</span>
-                            {% endif %}
-                        </td>
+                        
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm {% if transaction.is_income %}text-green-600{% else %}text-red-600{% endif %}">
                                 {% if transaction.is_income %}+{% else %}-{% endif %}R$ {{ transaction.amount|floatformat:2 }}
@@ -124,4 +205,110 @@
         </div>
     </div>
 </div>
+
+<!-- JavaScript para o modal -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Elementos do DOM
+        const modal = document.getElementById('transactionModal');
+        const btnNewTransaction = document.getElementById('btnNewTransaction');
+        const btnCloseModal = document.getElementById('btnCloseModal');
+        const btnCancelTransaction = document.getElementById('btnCancelTransaction');
+        const transactionForm = document.getElementById('transactionForm');
+        const dateInput = document.getElementById('date');
+        
+        // Função para abrir o modal
+        function openModal() {
+            modal.classList.remove('hidden');
+            setDefaultDate();
+        }
+        
+        // Função para fechar o modal
+        function closeModal() {
+            modal.classList.add('hidden');
+            transactionForm.reset();
+        }
+        
+        // Função para definir a data padrão (hoje)
+        function setDefaultDate() {
+            if (!dateInput.value) {
+                const today = new Date();
+                const year = today.getFullYear();
+                const month = String(today.getMonth() + 1).padStart(2, '0');
+                const day = String(today.getDate()).padStart(2, '0');
+                dateInput.value = `${year}-${month}-${day}`;
+            }
+        }
+        
+        // Event listeners
+        btnNewTransaction.addEventListener('click', openModal);
+        btnCloseModal.addEventListener('click', closeModal);
+        btnCancelTransaction.addEventListener('click', closeModal);
+        
+        // Fechar o modal se clicar fora dele
+        modal.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+        
+        // Manipular envio do formulário
+        transactionForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            // Obter valores do formulário
+            const formData = {
+                type: document.getElementById('transactionType').value,
+                value: document.getElementById('value').value,
+                date: document.getElementById('date').value || getCurrentDateString(),
+                title: document.getElementById('title').value,
+                observation: document.getElementById('observation').value
+            };
+            
+            // Aqui você pode adicionar código para enviar os dados para o servidor
+            console.log('Dados da transação:', formData);
+            
+            // Exemplo: enviar para o backend via fetch (você precisará implementar isso)
+            /*
+            fetch('/api/transactions/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken() // Função para obter o token CSRF do Django
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Transação salva com sucesso!');
+                closeModal();
+                // Recarregar a página ou atualizar a lista de transações
+                window.location.reload();
+            })
+            .catch(error => {
+                console.error('Erro ao salvar transação:', error);
+                alert('Erro ao salvar a transação. Tente novamente.');
+            });
+            */
+            
+            // Por enquanto, apenas fechar o modal após o envio
+            alert('Transação registrada!');
+            closeModal();
+        });
+        
+        // Função para obter a data atual no formato YYYY-MM-DD
+        function getCurrentDateString() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+        
+        // Função para obter o token CSRF (necessário para requisições POST no Django)
+        function getCsrfToken() {
+            return document.querySelector('[name=csrfmiddlewaretoken]').value;
+        }
+    });
+</script>
 {% endblock %} 

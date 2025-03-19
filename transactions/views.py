@@ -7,6 +7,10 @@ from django.utils import timezone
 from django.db.models import Sum
 from datetime import datetime, timedelta
 from django.contrib.auth import get_user_model
+from django.views.generic import ListView
+from users.models import CustomUser
+from django.http import JsonResponse
+import json
 
 # Create your views here.
 
@@ -90,60 +94,123 @@ class BalanceCreateView(View):
             return redirect('balance_create')
 
 # Removido o LoginRequiredMixin para permitir acesso sem autenticação
-class TransactionListView(View):
+class TransactionListView(ListView):
+    model = Transaction
     template_name = 'transactions/transaction_list.html'
+    context_object_name = 'transactions'
     
-    def get(self, request):
-        # Se o usuário não estiver autenticado, usamos um usuário fictício para testes
-        if not request.user.is_authenticated:
-            User = get_user_model()
-            try:
-                # Tenta obter o primeiro usuário do banco de dados
-                user = User.objects.first()
-                if not user:
-                    # Se não houver usuários, cria um usuário de teste
-                    user = User.objects.create_user(
-                        username='teste',
-                        email='teste@example.com',
-                        password='senha123',
-                        name='Usuário de Teste'
-                    )
-            except Exception as e:
-                # Em caso de erro, usamos valores padrão
-                transactions = []
-                income_total = 0
-                expense_total = 0
-                balance = 0
-                
-                context = {
-                    'transactions': transactions,
-                    'income_total': income_total,
-                    'expense_total': expense_total,
-                    'balance': balance
-                }
-                return render(request, self.template_name, context)
+    def get_queryset(self):
+        # Verificar se o usuário está autenticado
+        if self.request.user.is_authenticated:
+            return Transaction.objects.filter(user=self.request.user).order_by('-transaction_date')
         else:
-            user = request.user
+            # Para usuários não autenticados
+            from users.models import CustomUser
+            test_user = CustomUser.objects.first()
+            if test_user:
+                return Transaction.objects.filter(user=test_user).order_by('-transaction_date')
+            else:
+                return Transaction.objects.none()
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         
-        try:
-            # Buscar transações do usuário
-            transactions = Transaction.objects.filter(user=user).order_by('-transaction_date')
+        # Verificar se o usuário está autenticado antes de buscar categorias e métodos de pagamento
+        if self.request.user.is_authenticated:
+            user = self.request.user
+        else:
+            # Usar usuário de teste para contexto
+            from users.models import CustomUser
+            user = CustomUser.objects.first() or None
+        
+        if user:
+            from django.db.models import Sum
+            from .models import Category, PaymentMethod
             
-            # Calcular totais
-            income_total = transactions.filter(type='INCOME').aggregate(total=Sum('amount'))['total'] or 0
-            expense_total = transactions.filter(type='EXPENSE').aggregate(total=Sum('amount'))['total'] or 0
-            balance = income_total - expense_total
-        except:
-            # Em caso de erro, usamos valores padrão
-            transactions = []
-            income_total = 0
-            expense_total = 0
-            balance = 0
+            # Adicionar categorias e métodos de pagamento ao contexto
+            context['categories'] = Category.objects.filter(user=user)
+            context['payment_methods'] = PaymentMethod.objects.filter(user=user)
+            
+            # Calcular totais para o resumo financeiro
+            income = Transaction.objects.filter(
+                user=user, 
+                type='income',
+                is_paid=True  # Presumindo que is_paid é o campo correto, não status
+            ).aggregate(Sum('amount'))['amount__sum'] or 0
+            
+            expense = Transaction.objects.filter(
+                user=user, 
+                type='expense',
+                is_paid=True
+            ).aggregate(Sum('amount'))['amount__sum'] or 0
+            
+            context['total_income'] = income
+            context['total_expense'] = expense
+            context['balance'] = income - expense
+        else:
+            # Valores padrão se não houver usuário
+            context['categories'] = []
+            context['payment_methods'] = []
+            context['total_income'] = 0
+            context['total_expense'] = 0
+            context['balance'] = 0
         
-        context = {
-            'transactions': transactions,
-            'income_total': income_total,
-            'expense_total': expense_total,
-            'balance': balance
-        }
-        return render(request, self.template_name, context)
+        return context
+
+def create_default_categories(user):
+    Category.objects.get_or_create(name="Entrada", user=user)
+    Category.objects.get_or_create(name="Saída", user=user)
+
+def create_transaction(request):
+    try:
+        data = json.loads(request.body)
+        
+        # Obter os dados do formulário
+        transaction_type = data.get('type')
+        amount = float(data.get('amount', 0))
+        date_str = data.get('date')
+        description = data.get('description')
+        payment_method_id = data.get('payment_method')
+        status = data.get('status', 'paid')
+        notes = data.get('notes', '')
+        
+        # Validar dados obrigatórios
+        if not all([transaction_type, amount, description, payment_method_id]):
+            return JsonResponse({'error': 'Campos obrigatórios não preenchidos'}, status=400)
+        
+        # Processar a data
+        if date_str:
+            date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        else:
+            date = datetime.now().date()
+        
+        # Buscar método de pagamento
+        try:
+            payment_method = PaymentMethod.objects.get(id=payment_method_id, user=request.user)
+        except PaymentMethod.DoesNotExist:
+            return JsonResponse({'error': 'Método de pagamento inválido'}, status=400)
+        
+        # Criar a transação (sem vincular a uma categoria)
+        transaction = Transaction.objects.create(
+            user=request.user,
+            type=transaction_type,
+            amount=amount,
+            transaction_date=date,
+            description=description,
+            payment_method=payment_method,
+            is_paid=(status == 'paid'),
+            notes=notes
+        )
+        
+        # Atualizar o saldo da carteira se a transação for paga
+        if status == 'paid':
+            update_balance(request.user, transaction_type, amount)
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Transação cadastrada com sucesso',
+            'transaction_id': transaction.id
+        })
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
